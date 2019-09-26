@@ -366,3 +366,161 @@ A seller can be attached to many dealership locations as well as a dealshipershi
 #### Many-to-many relationship migration
 
 When you create a model you use a singlar term, e.g. **Brand**. If you look into you migration files all the tables are created with plural name, in the case **brands**
+
+#### Adding a pivot table
+
+To handle many-to-many relationship we use a pivot table. To create such a table we need to create the table ourselves using artisan: 
+
+`php artisan make:migration create_dealership_seller_table --create=dealership_seller`
+
+To get the full force of pivot tables in Laravel we use the singular form of each model with a underscore inbetween. The model table must be ordered in an **alphabetical order**, so *dealership* comes before *seller*.
+
+To the newly created migration file you add the following two columns : 
+
+```
+$table->unsignedBigInteger('dealership_id');
+$table->unsignedBigInteger('seller_id');
+```
+
+Your migration file should look like this : 
+
+```
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateDealershipSellerTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('dealership_seller', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('dealership_id');
+            $table->unsignedBigInteger('seller_id');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('dealership_seller');
+    }
+}
+```
+
+### Migration setup for Customer
+
+We make a very simple customer model, so we just need a name
+
+`$table->string('name'); `
+
+Your migration file will look like this : 
+
+```
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateCustomersTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('customers', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('customers');
+    }
+}
+
+```
+
+### Migration setup for Order
+ 
+We want the following info for an order
+
+- Who bought the car 
+- Which car
+- Who sold the car
+- Which dealership got the order
+- How long can the customer bitch about the car
+ 
+So we add the following fields for an order : 
+
+```
+$table->unsignedBigInteger('customer_id');
+$table->unsignedBigInteger('car_id');
+$table->unsignedBigInteger('seller_id');
+$table->unsignedBigInteger('dealership_id');
+$table->dateTime('warranty_expires');
+```
+
+Your migration file for an order will look like this
+
+```
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateOrdersTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('orders', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('customer_id');
+            $table->unsignedBigInteger('car_id');
+            $table->unsignedBigInteger('seller_id');
+            $table->unsignedBigInteger('dealership_id');
+            $table->dateTime('warranty_expires');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('orders');
+    }
+}
+```
