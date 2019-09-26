@@ -1,4 +1,4 @@
-#Laravel Nova - Adapt Developer intro
+# Laravel Nova - Adapt Developer intro
 
 - What is Laravel Nova ?
 - Why is it not free ?
@@ -6,11 +6,11 @@
 
 
 
-##Step 1
+## Step 1
 
 Select your favorite Vagrant Homestead / Local setup / Valet / LaraDock
 
-###Installing the Laravel framework
+### Installing the Laravel framework
 
 `composer create-project --prefer-dist laravel/laravel hustlingcars`
 
@@ -27,7 +27,7 @@ If you are using Homestead, you can just add public folder along with a domain t
 `vagrant reload --provision`
 
 
-##Installing Nova
+## Installing Nova
 
 ### Add Nova through composer
 
@@ -58,7 +58,7 @@ The last step is to add an user (if you are starting from scratch), so you will 
 `php artisan nova:user`
 
 
-##Step 2
+## Step 2
 
 ### Our model
 
@@ -93,7 +93,7 @@ This will create 7 models in your `/app` folder and the same number of migration
 
 ### Migration setup for Brand and Color
 
-####Brand
+#### Brand
 
 Brand and color are simple data tables that will be part of the description of the car. 
 
@@ -141,7 +141,7 @@ class CreateBrandsTable extends Migration
  
 ```
 
-####Color
+#### Color
 
 Add the same column to Color migration file
 
