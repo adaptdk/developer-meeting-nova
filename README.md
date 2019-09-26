@@ -1,4 +1,4 @@
-# Laravel Nova - Adapt Developer intro
+#Laravel Nova - Adapt Developer intro
 
 - What is Laravel Nova ?
 - Why is it not free ?
@@ -20,14 +20,14 @@ Next change directory into your fresh new project
 
 Setup your .env file with correct DB settings. You can select a MySQL or a Postgres. We will not judge you in any case.
 
-###Homestead users
+#### Homestead users
 
 If you are using Homestead, you can just add public folder along with a domain the DB name to your Homestead and provision the box. Add needed part to your homestead.yml file and reload your box using:
 
 `vagrant reload --provision`
 
 
-## Installing Nova
+##Installing Nova
 
 ### Add Nova through composer
 
@@ -58,7 +58,7 @@ The last step is to add an user (if you are starting from scratch), so you will 
 `php artisan nova:user`
 
 
-## Step 2
+##Step 2
 
 ### Our model
 
@@ -242,7 +242,7 @@ class CreateDealershipsTable extends Migration
 
 ### Migration setup for Car
 
-####Car
+#### Car
 
 Car model will contain relationships to Brand and Color. A car can be of a brand and have one color (for simplicity we selected that it only has a one color).
 
@@ -314,4 +314,55 @@ class CreateCarsTable extends Migration
 }
 ```
 
+
+### Migration setup for Seller
+
+A seller can work shifts in different Dealership locations. First we just setup our plain seller model by adding a name to our migration file in the `Schema::create` part.
+
+`$table->string('name'); `
  
+ Your Seller model should look like this: 
+ 
+```
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateSellersTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('sellers', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('sellers');
+    }
+}
+```
+
+### Dealership to Seller - Many to many
+
+
+A seller can be attached to many dealership locations as well as a dealshipership can have many sellers. 
+
+#### Many-to-many relationship migration
+
+When you create a model you use a singlar term, e.g. **Brand**. If you look into you migration files all the tables are created with plural name, in the case **brands**
