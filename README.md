@@ -524,3 +524,27 @@ class CreateOrdersTable extends Migration
     }
 }
 ```
+
+
+
+## Step 3
+
+### Laravel models explained
+
+### Factories and seeds
+
+### Show tables with data
+
+## Step 4
+
+### Nova® Magic
+
+## Step 5
+
+### Admin interface tour
+
+### Data usage: API / Frontend
+
+### Additional packages
+
+
