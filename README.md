@@ -539,6 +539,10 @@ class CreateOrdersTable extends Migration
 
 ### Nova® Magic
 
+### Nova resources
+
+### Nova relations
+
 ## Step 5
 
 ### Admin interface tour
