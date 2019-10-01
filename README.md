@@ -1,4 +1,4 @@
-#Laravel Nova - Adapt Developer intro
+# Laravel Nova - Adapt Developer intro
 
 - What is Laravel Nova ?
 - Why is it not free ?
@@ -27,7 +27,7 @@ If you are using Homestead, you can just add public folder along with a domain t
 `vagrant reload --provision`
 
 
-##Installing Nova
+## Installing Nova
 
 ### Add Nova through composer
 
@@ -58,7 +58,7 @@ The last step is to add an user (if you are starting from scratch), so you will 
 `php artisan nova:user`
 
 
-##Step 2
+## Step 2
 
 ### Our model
 
