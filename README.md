@@ -525,17 +525,530 @@ class CreateOrdersTable extends Migration
 }
 ```
 
+### Migrating
+
+Migrating is done by calling the artisan command like this
+
+`artisan migrate`
+
+This will create the tables in your database. It will also writes which migration files has been added in the *migration*-table.
+
+If something goes wrong or you have forgot some of the fields you can do a rollback. 
+
+`artisan migrate:rollback`
+
+#### More info on fresh, refresh and multiple rollbacks. 
+
+For additional info on how you run migrations, do a full refresh and related info read more at [Offical Laravel Documentation](https://laravel.com/docs/6.x/migrations#rolling-back-migrations)
+
 
 
 ## Step 3
 
 ### Laravel models explained
 
+When you create models in Laravel using Artisan make:model they are stored in the `app` folder. 
+
+Your models are born quite empty like this : 
+
+```
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Brand extends Model
+{
+	// 
+}
+```
+
+### Make mass-assignment possible
+
+The framework guards attributes on your Models, so you need to tell which attributes are available for changing / setting data on.
+
+You have the following options for this:
+
+* `protected $guarded = []` tells explicitely which attributes are guarded making all other attributes changeable.
+* `protected $fillable = []` tells which attribute can be changed. All others are guarded.
+
+
+### Adding one-to-many relationship
+
+A brand can be possible for many different cars, so we define this as a one-to-many relationship. On the **Brand** model we add the following function. 
+
+**NOTE:** The function *cars()* is in plural as a brand can have multiple cars. 
+
+```
+public function cars() {
+	return $this->hasMany(Car::class);
+}
+```
+
+#### Brand model
+
+```
+<?php
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Brand extends Model
+{
+    /**
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+    ];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function cars()
+    {
+        return $this->hasMany(Car::class);
+    }
+}
+```
+
+#### Color model
+
+The Color model does not differ from a Brand (except from the class name), so it looks like this: 
+
+```
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Color extends Model
+{
+    protected $fillable = [
+        'name'
+    ];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function cars() {
+        return $this->hasMany(Car::class);
+    }
+}
+```
+
+### Car 
+
+You only need to add two field to `$fillable` as the rest will be added through the relationships.
+
+```
+protected $fillable = [
+    'model_type',
+    'description'
+];
+```
+
+#### Car BelongsTo relationship
+
+We add BelongsTo for the following : Brand, Color, Dealership and Order. You will add 4 functions  that looks like the following. Just change the function name and class name.
+
+
+```
+public function brand()
+{
+    return $this->belongsTo(Brand::class);
+}
+``` 
+
+### Car model 
+
+```
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Car extends Model
+{
+    protected $fillable = [
+        'model_type',
+        'description'
+    ];
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function color()
+    {
+        return $this->belongsTo(Color::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function dealership()
+    {
+        return $this->belongsTo(Dealership::class);
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+}
+```
+
+### Adding a many-to-many relationship
+
+A dealership will have many different sellers, but seller can also be selling car from one dealership on mondays and another on fridays, so we need to define a many-to-many relationship on our model. 
+
+**NOTE:** You already created a table for this earlier called `dealership_seller` which will hold *dealership_ids* and *seller_ids*.
+
+
+### Many-to-many relationship in code
+
+#### Dealership
+
+On the Dealership model you add the following 
+
+```
+public function sellers() {
+    return $this->belongsToMany(Seller::class);
+}
+```
+
+##### Add orders relationship
+
+You would also like to have a relationship where a Dealership can have a relationship to Orders, so you can get the orders that a single Dealership has. 
+
+Add the following: 
+
+```
+public function orders() {
+	return $this->hasMany(Order::class);
+}
+```
+
+#### Dealership model result
+
+```
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Dealership extends Model
+{
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'internal_name',
+        'street_name',
+        'city'
+    ];
+
+    public function sellers() {
+        return $this->belongsToMany(Seller::class);
+    }
+
+    public function orders() {
+        return $this->hasMany(Order::class);
+    }
+}
+```
+
+
+#### Seller
+
+You basically add the same on the Seller model, just pointing toward the Dealership.
+
+```
+public function dealership() {
+    return $this->belongsTo(Dealership::class);
+}
+```
+
+#### Seller model result
+
+```
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Seller extends Model
+{
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+    ];
+
+    public function dealerships() {
+        return $this->belongsToMany(Dealership::class);
+    }
+}
+```
+
+### Customer
+
+Our customer is a very simple model, so we add *name* to `$fillable` and add **Order** as a relationship. Your model will look like this: 
+
+```
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Customer extends Model
+{
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'name'
+    ];
+
+    public function orders() {
+        return $this->hasMany(Order::class);
+    }
+}
+```
+
+### Order
+
+On **Order** we only got the `warranty_expires` field and belongTo relationship for Car, Customer, Dealership and Seller.
+
+Your model will look like this: 
+
+```
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Order extends Model
+{
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'warranty_expires',
+    ];
+
+    public function customer() {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function car() {
+        return $this->belongsTo(Car::class);
+    }
+
+    public function seller() {
+        return $this->belongsTo(Seller::class);
+    }
+
+    public function dealership() {
+        return $this->belongsTo(Dealership::class);
+    }
+}
+```
+## Step 4
+
+
+ 
 ### Factories and seeds
+
+A factory and seeding is an easy way to mock a lot of test data into your model. Factories are designed to handle a single model (without or with relationships) and seeders take care of using the factories or other data to actually do the mocking.
+
+#### Creating factories and table seeders
+
+As with much else we use the command line for this. 
+
+For factories 
+
+`artisan make:factory ModelnameFactory` 
+
+For seeder
+
+`artisan make:seeder ModelnameTableSeeder` 
+
+This creates files in the folders `database/factories/` and `database/seeds/`.
+
+### Brand seeder
+
+Create the seeder : `artisan make:seeder BrandsTableSeeder`
+
+Since we know the data we want to use, we can do it by only using the seeder. The BrandsTableSeeder will look like this: 
+
+```
+<?php
+
+use App\Brand;
+use Illuminate\Database\Seeder;
+
+class BrandsTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $brandNames = [
+            'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW', 'Bugatti', 'Chrysler', 'Citroen', 'Ferrari',
+            'Fiat', 'Honda', 'Hyundai', 'Kia', 'Lamborghini', 'Lancia', 'Land Rover', 'Maserati', 'McLaren',
+            'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Opel', 'Peugeot', 'Porsche', 'Renault', 'Rolls-Royce', 'Suzuki',
+            'Toyota', 'Volkswagen'
+        ];
+
+        // If you run this multiple times, we truncate it first.
+        Brand::truncate();
+
+        foreach ($brandNames as $brandName) {
+            Brand::create([
+                'name' => $brandName
+            ]);
+        }
+    }
+}
+```
+
+### Color seeder
+
+Create the seeder : `artisan make:seeder ColorsTableSeeder`
+
+Pretty much the same as with the BrandsTableSeeder. Looks like this: 
+
+```
+<?php
+
+use App\Color;
+use Illuminate\Database\Seeder;
+
+class ColorsTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+
+        $colors = [
+            'Unclean Oven Black', 'Given Up Grey', 'Mold Green', 'Poop Brown', 'Bad Rash Red',
+            'Trump Orange','Black Eye Violet', 'Morning Pee Yellow', 'Blue Waffle Blue', 
+            'Coffee Stain White',
+        ];
+
+        // If you run this multiple times, we truncate it first.
+        Color::truncate();
+
+        foreach ($colors as $color) {
+            Color::create([
+                'name' => $color
+            ]);
+        }
+    }
+}
+```
+
+### Dealership factory and seeder
+
+#### Factory
+
+First we create the factory 
+
+`artisan make:factory DealershipFactory`
+
+We want to add data into following attributes : *internal_name*, *street_name* and *city*. 
+
+The factories you create using *artisan* use the faker package. For more info [read about The Faker package](https://github.com/fzaninotto/Faker)
+
+Your factory will look like this :
+
+```
+<?php
+
+/** @var \Illuminate\Database\Eloquent\Factory $factory */
+
+use App\Dealership;
+use Faker\Generator as Faker;
+
+$factory->define(Dealership::class, function (Faker $faker) {
+
+    return [
+        'internal_name' => $faker->state . ' ' . $faker->cityPrefix,
+        'street_name' => $faker->streetAddress,
+        'city' => $faker->city
+    ];
+});
+```
+
+#### Seeder
+
+Create the seeder for the dealership
+
+`artisan make:seeder DealershipsTableSeeder`
+
+Since all the heavy lifting is done in the factory, we just need to initate it.
+
+```
+<?php
+
+use App\Dealership;
+use Illuminate\Database\Seeder;
+
+class DealershipsTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $count = 12;
+        factory(Dealership::class, $count)->create();
+    }
+}
+
+```
+
+
+### Car factory and seeder
+
+
+
+
+
 
 ### Show tables with data
 
-## Step 4
+## Step 5
 
 ### Nova® Magic
 
@@ -543,12 +1056,14 @@ class CreateOrdersTable extends Migration
 
 ### Nova relations
 
-## Step 5
+## Step 6
 
 ### Admin interface tour
 
 ### Data usage: API / Frontend
 
 ### Additional packages
+
+
 
 
