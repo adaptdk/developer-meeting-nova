@@ -1048,11 +1048,67 @@ class DealershipsTableSeeder extends Seeder
 
 ### Show tables with data
 
+
+
 ## Step 5
 
 ### Nova® Magic
 
+
 ### Nova resources
+
+Creating Nova resources are pretty easy. Just use artisan for it:
+
+`artisan nova:resource Brand`
+
+This will create a file with the Brand resource as `/app/Nova/Brand.php` with a lot of boilerplate code. If you have setup your domain, so you can access the site using your browser go to : `http://yourdomain.test/nova`
+
+Log in to Nova with your user and you will in the sidebar menu see the **Brand** menu item.
+
+
+#### Registering resources
+
+If you leave the files in the `/app/Nova/`-folder they will automatically be registered.
+
+
+### Adding fields
+
+In the `Brand.php` find the following fields() function that should look like this:
+
+```
+/**
+ * Get the fields displayed by the resource.
+ *
+ * @param  \Illuminate\Http\Request  $request
+ * @return array
+ */
+public function fields(Request $request)
+{
+    return [
+        ID::make()->sortable(),
+    ];
+} 
+```
+
+We want to Add the name as a field, so we add the class in the use-statements: 
+
+`use Laravel\Nova\Http\Requests\NovaRequest;`
+
+And in the fields-function, below the `ID::make()->sortable(),` add a new line with the following statement: 
+
+`Text::make('Brand name', 'name')->sortable()`
+
+The first parameter of the make-function defines the name (or the DB-column if the second parameter is not used) and the second parameter defines the column name in the DB-table.
+
+
+You will now have the possibility to make all CRUD operations through the Nova-interface with that column. Laravel Nova has quite a lot of field types already built in to it: [Laravel Nova field types](https://nova.laravel.com/docs/2.0/resources/fields.html#field-types)
+
+### Create the rest of Nova resources
+
+```
+artisan nova:resource Color
+ artisan nova:resource Customer
+```
 
 ### Nova relations
 
